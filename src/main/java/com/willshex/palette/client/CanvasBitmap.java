@@ -17,13 +17,39 @@ package com.willshex.palette.client;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.CanvasPixelArray;
+import com.google.gwt.dom.client.ImageElement;
+import com.google.gwt.user.client.ui.Image;
 import com.willshex.palette.shared.Bitmap;
 import com.willshex.palette.shared.Color;
 
 public class CanvasBitmap implements Bitmap {
 
-  private Canvas canvas;
-  
+  private Canvas canvas = Canvas.createIfSupported();
+  private Image image;
+
+  /**
+   * 
+   */
+  public CanvasBitmap(Image image) {
+    this.image = image;
+    setupCanvas(image.getWidth(), image.getHeight());
+    draw();
+  }
+
+  private void setupCanvas(int width, int height) {
+    canvas.setSize(Integer.toString(width) + "px", Integer.toString(height)
+        + "px");
+
+    canvas.setCoordinateSpaceWidth(width);
+    canvas.setCoordinateSpaceHeight(height);
+  }
+
+  private void draw() {
+    ImageElement imgElem = ImageElement.as(image.getElement());
+    canvas.getContext2d().drawImage(imgElem, 0, 0,
+        canvas.getCoordinateSpaceWidth(), canvas.getCoordinateSpaceHeight());
+  }
+
   @Override
   public int getWidth() {
     return canvas.getCoordinateSpaceWidth();
@@ -51,17 +77,19 @@ public class CanvasBitmap implements Bitmap {
 
   @Override
   public Bitmap copyScaled(int width, int height) {
-    return null;
+    // does not actually copy the image, just scales it and draws on top
+    setupCanvas(width, height);
+    draw();
+    return this;
   }
 
   @Override
   public void recycle() {
-    canvas.removeFromParent();
   }
 
   @Override
   public boolean isRecycled() {
-    return !canvas.isAttached();
+    return false;
   }
 
 }

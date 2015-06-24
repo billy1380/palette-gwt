@@ -318,7 +318,7 @@ public class Color {
         if (hsv.length < 3) {
             throw new RuntimeException("3 components required for hsv");
         }
-        nativeRGBToHSV(red, green, blue, hsv);
+        ColorUtils.RGBToHSL(red, green, blue, hsv);
     }
 
     /**
@@ -361,11 +361,9 @@ public class Color {
         if (hsv.length < 3) {
             throw new RuntimeException("3 components required for hsv");
         }
-        return nativeHSVToColor(alpha, hsv);
+        return ColorUtils.setAlphaComponent(ColorUtils.HSLToColor(hsv), alpha);
     }
 
-    private static native void nativeRGBToHSV(int red, int greed, int blue, float hsv[]);
-    private static native int nativeHSVToColor(int alpha, float hsv[]);
 
     /**
      * Converts an HTML color (named or numeric) to an integer RGB value.
