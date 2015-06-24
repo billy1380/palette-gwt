@@ -32,3 +32,6 @@ www-test/
 .settings/
 .project
 .classpath
+
+# mac files
+.DS_Store
