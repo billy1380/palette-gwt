@@ -270,4 +270,107 @@ public class ColorUtils {
         return (color & 0x00ffffff) | (alpha << 24);
     }
 
+    /**
+     * Convert RGB components to HSV (hue-saturation-value).
+     * <ul>
+     * <li>hsl[0] is Hue [0 .. 360)</li>
+     * <li>hsl[1] is Saturation [0...1]</li>
+     * <li>hsl[2] is Value [0...1]</li>
+     * </ul>
+     *
+     * @param r   red component value [0..255]
+     * @param g   green component value [0..255]
+     * @param b   blue component value [0..255]
+     * @param hsv 3 element array which holds the resulting HSV components.
+     */
+    public static void RGBToHSV(int red, int green, int blue, float[] hsv) {
+      float min, max, delta;
+
+      min = Math.min(red, Math.min(green, blue));
+      max = Math.max(red, Math.max(green, blue));
+      hsv[2] = max; // v
+
+      delta = max - min;
+
+      if (max != 0) hsv[1] = delta / max; // s
+      else {
+        // r = g = b = 0 // s = 0, v is undefined
+        hsv[1] = 0;
+        hsv[0] = -1;
+        return;
+      }
+
+      if (red == max) hsv[0] = (green - blue) / delta; // between yellow & magenta
+      else if (green == max) hsv[0] = 2 + (blue - red) / delta; // between cyan & yellow
+      else hsv[0] = 4 + (red - green) / delta; // between magenta & cyan
+
+      hsv[0] *= 60; // degrees
+      if (hsv[0] < 0) hsv[0] += 360;
+    }
+
+    /**
+     * Convert HSV (hue-saturation-value) components to a RGB color.
+     * <ul>
+     * <li>hsv[0] is Hue [0 .. 360)</li>
+     * <li>hsv[1] is Saturation [0...1]</li>
+     * <li>hsv[2] is Value [0...1]</li>
+     * </ul>
+     * If hsv values are out of range, they are pinned.
+     *
+     * @param hsv 3 element array which holds the input HSV components.
+     * @return the resulting RGB color
+     */
+    public static int HSVToColor(float[] hsv) {
+      hsv[0] = MathUtils.constrain(hsv[0], 0.0f, 1.0f);
+      hsv[1] = MathUtils.constrain(hsv[1], 0.0f, 1.0f);
+      hsv[2] = MathUtils.constrain(hsv[2], 0.0f, 1.0f);
+      
+      float red = 0.0f;
+      float green = 0.0f;
+      float blue = 0.0f;
+      
+      final float hf = (hsv[0] - (int) hsv[0]) * 6.0f;
+      final int ihf = (int) hf;
+      final float f = hf - ihf;
+      final float pv = hsv[2] * (1.0f - hsv[1]);
+      final float qv = hsv[2] * (1.0f - hsv[1] * f);
+      final float tv = hsv[2] * (1.0f - hsv[1] * (1.0f - f));
+
+      switch (ihf) {
+          case 0:         // Red is the dominant color
+              red = hsv[2];
+              green = tv;
+              blue = pv;
+              break;
+          case 1:         // Green is the dominant color
+              red = qv;
+              green = hsv[2];
+              blue = pv;
+              break;
+          case 2:
+              red = pv;
+              green = hsv[2];
+              blue = tv;
+              break;
+          case 3:         // Blue is the dominant color
+              red = pv;
+              green = qv;
+              blue = hsv[2];
+              break;
+          case 4:
+              red = tv;
+              green = pv;
+              blue = hsv[2];
+              break;
+          case 5:         // Red is the dominant color
+              red = hsv[2];
+              green = pv;
+              blue = qv;
+              break;
+      }
+
+      return 0xFF000000 | (((int) (red * 255.0f)) << 16) |
+              (((int) (green * 255.0f)) << 8) | ((int) (blue * 255.0f));
+    }
+
 }
