@@ -24,6 +24,8 @@ import com.willshex.palette.shared.Color;
 
 public class CanvasBitmap implements Bitmap {
 
+  private static final int COLOR_PARTS = 4;
+
   private Canvas canvas = Canvas.createIfSupported();
   private Image image;
 
@@ -37,8 +39,8 @@ public class CanvasBitmap implements Bitmap {
   }
 
   private void setupCanvas(int width, int height) {
-    canvas.setSize(Integer.toString(width) + "px", Integer.toString(height)
-        + "px");
+    canvas.setSize(Integer.toString(width) + "px",
+        Integer.toString(height) + "px");
 
     canvas.setCoordinateSpaceWidth(width);
     canvas.setCoordinateSpaceHeight(height);
@@ -65,13 +67,12 @@ public class CanvasBitmap implements Bitmap {
       int width, int height) {
     CanvasPixelArray array = canvas.getContext2d()
         .getImageData(0, 0, width, height).getData();
+
     // copy it to an array
     int dataLength = array.getLength();
-    for (int i = 0; i < dataLength; i++) {
-      if (i % 4 == 0) {
-        pixels[i / 4] = Color.argb(array.get(i + 3), array.get(i),
-            array.get(i + 1), array.get(i + 2));
-      }
+    for (int i = 0; i < dataLength; i += COLOR_PARTS) {
+      pixels[i / COLOR_PARTS] = Color.argb(array.get(i + 3), array.get(i),
+          array.get(i + 1), array.get(i + 2));
     }
   }
 
